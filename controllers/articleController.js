@@ -35,3 +35,5 @@ module.exports = {
   createArticle,
   deleteArticle
 };
+
+// node index.js esto para inciar el servidor en cmd
