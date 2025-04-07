@@ -10,11 +10,19 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-// Rutas
+// Rutas del blog
 const articleRoutes = require('./routes/articleRoutes');
 app.use('/api/articulos', articleRoutes);
 
-// Conexión a MongoDB
+// ✅ Rutas de login
+const authRoutes = require('./routes/auth');
+app.use('/auth', authRoutes); // <--- ESTA LÍNEA FALTABA
+
+const eventRoutes = require('./routes/events');
+app.use('/api/eventos', eventRoutes);
+
+
+// Conexión a MongoDB Atlas
 mongoose
   .connect(process.env.MONGODB_URI)
   .then(() => {
@@ -22,3 +30,4 @@ mongoose
     app.listen(PORT, () => console.log(`🚀 Servidor escuchando en http://localhost:${PORT}`));
   })
   .catch((error) => console.error('❌ Error al conectar con MongoDB:', error));
+
