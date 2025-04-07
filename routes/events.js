@@ -14,14 +14,61 @@ router.get('/', async (req, res) => {
 
 // Crear nuevo evento
 router.post('/', async (req, res) => {
-  const { title, start, end, userId } = req.body;
+  const { title, description, start, end, userId, email } = req.body;
+
+  console.log('✅ Recibiendo evento:', req.body); // 🧪 para comprobar lo que llega
 
   try {
-    const nuevoEvento = new Event({ title, start, end, createdBy: userId });
+    const nuevoEvento = new Event({
+      title,
+      description,
+      start,
+      end,
+      createdBy: userId,
+      createdByEmail: email
+    });
+
     await nuevoEvento.save();
     res.status(201).json(nuevoEvento);
   } catch (err) {
     res.status(500).json({ message: 'Error al crear evento', error: err.message });
+  }
+});
+
+// Actualizar evento existente
+router.put('/:id', async (req, res) => {
+  const { title, description, start, end } = req.body;
+
+  try {
+    const eventoActualizado = await Event.findByIdAndUpdate(req.params.id, {
+      title,
+      description,
+      start,
+      end
+    }, { new: true });
+
+    if (!eventoActualizado) {
+      return res.status(404).json({ message: 'Evento no encontrado' });
+    }
+
+    res.json(eventoActualizado);
+  } catch (err) {
+    res.status(500).json({ message: 'Error al actualizar evento', error: err.message });
+  }
+});
+
+// Eliminar evento
+router.delete('/:id', async (req, res) => {
+  try {
+    const eventoEliminado = await Event.findByIdAndDelete(req.params.id);
+
+    if (!eventoEliminado) {
+      return res.status(404).json({ message: 'Evento no encontrado' });
+    }
+
+    res.json({ message: 'Evento eliminado correctamente' });
+  } catch (err) {
+    res.status(500).json({ message: 'Error al eliminar evento', error: err.message });
   }
 });
 
