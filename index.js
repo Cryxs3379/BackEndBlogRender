@@ -21,6 +21,10 @@ app.use('/auth', authRoutes); // <--- ESTA LÍNEA FALTABA
 const eventRoutes = require('./routes/events');
 app.use('/api/eventos', eventRoutes);
 
+//ruta historial 
+const historialRoutes = require('./routes/historial');
+app.use('/api/historial', historialRoutes);
+
 
 // Conexión a MongoDB Atlas
 mongoose

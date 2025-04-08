@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Event = require('../models/Event');
+const Historial = require('../models/Historial');
 
 // Obtener todos los eventos
 router.get('/', async (req, res) => {
@@ -14,9 +15,7 @@ router.get('/', async (req, res) => {
 
 // Crear nuevo evento
 router.post('/', async (req, res) => {
-  const { title, description, start, end, userId, email } = req.body;
-
-  console.log('✅ Recibiendo evento:', req.body); // 🧪 para comprobar lo que llega
+  const { title, description, start, end, userId, email, nombre, apellido } = req.body;
 
   try {
     const nuevoEvento = new Event({
@@ -29,6 +28,17 @@ router.post('/', async (req, res) => {
     });
 
     await nuevoEvento.save();
+
+    if (nombre && apellido) {
+      await Historial.create({
+        usuarioId: userId,
+        nombre,
+        apellido,
+        accion: 'creó el evento',
+        eventoTitulo: title
+      });
+    }
+
     res.status(201).json(nuevoEvento);
   } catch (err) {
     res.status(500).json({ message: 'Error al crear evento', error: err.message });
@@ -37,7 +47,7 @@ router.post('/', async (req, res) => {
 
 // Actualizar evento existente
 router.put('/:id', async (req, res) => {
-  const { title, description, start, end } = req.body;
+  const { title, description, start, end, userId, nombre, apellido } = req.body;
 
   try {
     const eventoActualizado = await Event.findByIdAndUpdate(req.params.id, {
@@ -51,6 +61,16 @@ router.put('/:id', async (req, res) => {
       return res.status(404).json({ message: 'Evento no encontrado' });
     }
 
+    if (nombre && apellido) {
+      await Historial.create({
+        usuarioId: userId,
+        nombre,
+        apellido,
+        accion: 'editó el evento',
+        eventoTitulo: title
+      });
+    }
+
     res.json(eventoActualizado);
   } catch (err) {
     res.status(500).json({ message: 'Error al actualizar evento', error: err.message });
@@ -59,11 +79,23 @@ router.put('/:id', async (req, res) => {
 
 // Eliminar evento
 router.delete('/:id', async (req, res) => {
+  const { userId, nombre, apellido, titulo } = req.body;
+
   try {
     const eventoEliminado = await Event.findByIdAndDelete(req.params.id);
 
     if (!eventoEliminado) {
       return res.status(404).json({ message: 'Evento no encontrado' });
+    }
+
+    if (nombre && apellido) {
+      await Historial.create({
+        usuarioId: userId,
+        nombre,
+        apellido,
+        accion: 'eliminó el evento',
+        eventoTitulo: eventoEliminado.title
+      });
     }
 
     res.json({ message: 'Evento eliminado correctamente' });
