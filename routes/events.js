@@ -45,28 +45,41 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Actualizar evento existente
+// Actualizar evento existente con detección de movimiento
 router.put('/:id', async (req, res) => {
   const { title, description, start, end, userId, nombre, apellido } = req.body;
 
   try {
-    const eventoActualizado = await Event.findByIdAndUpdate(req.params.id, {
-      title,
-      description,
-      start,
-      end
-    }, { new: true });
+    const eventoOriginal = await Event.findById(req.params.id);
 
-    if (!eventoActualizado) {
+    if (!eventoOriginal) {
       return res.status(404).json({ message: 'Evento no encontrado' });
     }
 
+    const fueMovido =
+      eventoOriginal.start.toISOString() !== new Date(start).toISOString() ||
+      eventoOriginal.end.toISOString() !== new Date(end).toISOString();
+
+    const fueEditado =
+      eventoOriginal.title !== title || eventoOriginal.description !== description;
+
+    const eventoActualizado = await Event.findByIdAndUpdate(
+      req.params.id,
+      { title, description, start, end },
+      { new: true }
+    );
+
     if (nombre && apellido) {
+      let accion = 'editó el evento';
+      if (fueMovido && !fueEditado) {
+        accion = 'movió el evento';
+      }
+
       await Historial.create({
         usuarioId: userId,
         nombre,
         apellido,
-        accion: 'editó el evento',
+        accion,
         eventoTitulo: title
       });
     }
@@ -79,7 +92,7 @@ router.put('/:id', async (req, res) => {
 
 // Eliminar evento
 router.delete('/:id', async (req, res) => {
-  const { userId, nombre, apellido, titulo } = req.body;
+  const { userId, nombre, apellido } = req.body;
 
   try {
     const eventoEliminado = await Event.findByIdAndDelete(req.params.id);
