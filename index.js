@@ -29,7 +29,8 @@ app.use('/auth', authRoutes);
 
 // 📖 Rutas de login para biblioteca
 const libraryAuthRoutes = require('./routes/libraryAuth');
-app.use('/api/auth', libraryAuthRoutes); // endpoint: /api/auth/library
+app.use('/api/auth', libraryAuthRoutes); // <- Esto ya lo tienes bien
+
 
 // 📅 Eventos (calendario)
 const eventRoutes = require('./routes/events');

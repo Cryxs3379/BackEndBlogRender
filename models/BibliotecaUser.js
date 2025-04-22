@@ -5,7 +5,8 @@ const bibliotecaUserSchema = new mongoose.Schema({
   password: { type: String, required: true },
   nombre: String,
   apellido: String,
-  fechaCreacion: { type: Date, default: Date.now }
+  fechaCreacion: { type: Date, default: Date.now },
 });
 
 module.exports = mongoose.model('BibliotecaUser', bibliotecaUserSchema, 'usuariosbiblioteca');
+
